@@ -12,11 +12,11 @@ export function getApiClient() {
 export function handleApiError(error, displayErrorFn, kickUserOut = null) {
   if (error.response) {
     if (error.response.status === 400) {
-      displayErrorFn('Bad Request (400): ' + error.response.data.error);
+      displayErrorFn('Bad Request (400): ' + error.response.data.message);
     } else if (error.response.status === 401) {
-      displayErrorFn('Error (401): ' + error.response.data.error);
+      displayErrorFn('Error (401): ' + error.response.data.message);
     } else if (error.response.status === 403) {
-      displayErrorFn('Forbidden (403): ' + error.response.data.error);
+      displayErrorFn('Forbidden (403): ' + error.response.data.message);
     } else if (error.response.status === 404) {
       displayErrorFn('Not Found (404)');
     } else if (error.response.status === 405) {

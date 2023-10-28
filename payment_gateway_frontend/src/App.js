@@ -1,7 +1,8 @@
 import React from 'react';
+import PaymentPage from './components/payment/payment_page';
 
 const App = () => {
-  return <p>Hello World!</p>
+  return <PaymentPage />;
 };
 
 export default App;
