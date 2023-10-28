@@ -23,3 +23,7 @@ app.get('/', (_, response) => {
 const router = express.Router();
 
 module.exports = { router };
+
+const paymentRouter = require('./payment');
+
+app.use('/api/payment', paymentRouter);
