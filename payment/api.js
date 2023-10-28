@@ -1,7 +1,7 @@
 const { router } = require('../index');
 const { requireStringParam } = require('../decorators/require_param');
 const { validateCreditCardExpirationDate } = require('../decorators/validators');
-const db = require('../db');
+const db = require('../database/db');
 
 router.post(
 	'/accept_payment',
