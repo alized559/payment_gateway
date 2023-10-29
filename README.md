@@ -15,7 +15,7 @@ The [.env](.env) file is a plain text configuration file that contains environme
 
 ## Database Specs & Integration
 
-We uses a relational database (Postgres). Everything related to our database is found inside the `database/` folder.
+We uses a relational database (Postgres). Everything related to our database is found inside the [database](database) folder.
 
 ### Frontend Linting
 
