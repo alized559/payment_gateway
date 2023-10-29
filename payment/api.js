@@ -4,7 +4,6 @@ const { validateCreditCardExpirationDate } = require('../decorators/validators')
 const db = require('../database/db');
 const bcrypt = require('bcrypt');
 
-
 const isCreditCardValid = (cardNumber) => {
 	let nbOfDigits = cardNumber.length;
 	let sum = 0;
