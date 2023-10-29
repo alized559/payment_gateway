@@ -19,7 +19,7 @@ We uses a relational database (Postgres). Everything related to our database is 
 
 ### Frontend Linting
 
-The [`payment_gateway_frontend`](payment_gateway_frontend) project actually users eslint.
+The [`payment_gateway_frontend`](payment_gateway_frontend) project actually uses eslint.
 
 ## Prerequisites
 
