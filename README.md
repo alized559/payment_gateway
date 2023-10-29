@@ -26,6 +26,7 @@ The [`payment_gateway_frontend`](payment_gateway_frontend) project actually uses
 To run this application, you will need:
 
 - [NodeJS](https://nodejs.org/) version 18.12.1.
+- [Npm](https://www.npmjs.com/) version 8.19.2.
 - [PostgreSQL](https://www.postgresql.org/) version 12.
 - [PgAdmin4](https://www.pgadmin.org/) (any version, but the latest is recommended) for managing the PostgreSQL database system.
 
