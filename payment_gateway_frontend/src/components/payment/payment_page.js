@@ -1,12 +1,23 @@
 import React, { useReducer, useCallback } from 'react';
+import { Form } from 'semantic-ui-react';
+import Cards from 'react-credit-cards-2';
+import styled from 'styled-components';
+import { getApiClient, makeStandardApiErrorHandler } from '../../api_client/get';
+import ThankYouPopup from './thank_you_popup';
+import 'react-credit-cards-2/dist/es/styles-compiled.css';
 
 const reducer = (state, action) => {
-  switch (action) {
-    case 'card-number-changed': return { ...state, cardNumber: action.cardNumber };
-    case 'cvv-changed': return { ...state, cvv: action.cardNumber };
-    case 'card-holder-name-changed': return { ...state, cardHolderName: action.cardNumber };
-    case 'expiration-date-changed': return { ...state, expirationDate: action.cardNumber };
-    case 'submit-start': return { ...state, loading: true };
+  switch (action.type) {
+    case 'card-number-changed': return { ...state, cardNumber: action.cardNumber, errorMessage: null };
+    case 'cvv-changed': return { ...state, cvv: action.cvv, errorMessage: null };
+    case 'card-holder-name-changed': return { ...state, cardHolderName: action.cardHolderName, errorMessage: null };
+    case 'expiration-date-changed': return { ...state, expirationDate: action.expirationDate, errorMessage: null };
+    case 'focus-changed': return { ...state, cardFocus: action.cardFocus, errorMessage: null };
+    case 'submit-start': return { ...state, loading: true, errorMessage: null };
+    case 'submit-fail': return { ...state, loading: false, errorMessage: action.message };
+    case 'submit-success': return { ...state, loading: false, submitSuccess: true };
+    case 'close-popup': return { ...state, submitSuccess: false };
+    default: throw new Error('Unhandled action type: ' + action.type);
   };
 };
 
@@ -17,7 +28,9 @@ const PaymentPage = () => {
     cardNumber: '',
     cvv: '',
     cardHolderName: '',
-    expirationDate: ''
+    expirationDate: '',
+    cardFocus: '',
+    submitSuccess: false
   });
   const {
     loading,
@@ -25,7 +38,9 @@ const PaymentPage = () => {
     cardNumber,
     cvv,
     cardHolderName,
-    expirationDate
+    expirationDate,
+    cardFocus,
+    submitSuccess
   } = state;
 
   const onChangeCardNumber = useCallback((e) => {
@@ -44,22 +59,26 @@ const PaymentPage = () => {
     dispatch({ type: 'expiration-date-changed', expirationDate: e.target.value });
   }, []);
 
+  const onChangeFocus = useCallback((e) => {
+    dispatch({ type: 'focus-changed', cardFocus: e.target.name });
+  }, []);
+
   const validate = useCallback(() => {
     if (!cardNumber || !cvv || !cardHolderName || !expirationDate) {
       dispatch({ type: 'submit-fail', message: 'Please enter all fields.' });
       return false;
     }
-    if (cardNumber.length !== 16) {
+    if (cardNumber.replace(/\s/g, '').length !== 16 || !/^\d+$/.test(cardNumber.replace(/\s/g, ''))) {
       dispatch({ type: 'submit-fail', message: 'Invalid card number.' });
       return false;
     }
-    if (cvv.length !== 3) {
+    if (cvv.length !== 3 || !/^\d+$/.test(cvv)) {
       dispatch({ type: 'submit-fail', message: 'Invalid cvv.' });
       return false;
     }
-    const pattern = /^(0[1-9]|1[0-2])\/\d{4}$/;
-    if (!expirationDate.test(pattern)) {
-      dispatch({ type: 'submit-fail', message: 'Expiration date must be in this format: MM/YYYY.' });
+    const expirationDatePattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!expirationDatePattern.test(expirationDate)) {
+      dispatch({ type: 'submit-fail', message: 'Expiration date must be in this format: MM/YY.' });
       return false;
     }
     return true;
@@ -78,30 +97,79 @@ const PaymentPage = () => {
         })
         .catch(makeStandardApiErrorHandler(error => dispatch({ type: 'submit-fail', message: error })));
     }
-  }, [cardNumber, cvv, cardHolderName, expirationDate]);
+  }, [cardNumber, cvv, cardHolderName, expirationDate, validate]);
+
+  const closePopup = useCallback(() => {
+    dispatch({ type: 'close-popup' });
+  }, []);
 
   return (
-    <div>
-      <h1>Payment Gateway</h1>
-      <div>
-        <label>Card Number:</label>
-        <input type='text' value={cardNumber} onChange={onChangeCardNumber} />
-      </div>
-      <div>
-        <label>CVV:</label>
-        <input type='text' value={cvv} onChange={onChangeCVV} />
-      </div>
-      <div>
-        <label>Card Holder Name:</label>
-        <input type='text' value={cardHolderName} onChange={onChangeCardHolderName} />
-      </div>
-      <div>
-        <label>Expiration Date:</label>
-        <input type='text' value={expirationDate} onChange={onChangeExpirationDate} />
-      </div>
-      <button onClick={onSubmit}>Submit Payment</button>
-    </div>
+    <>
+      <CardContainer clasName="rccs__card rccs__card--unknown">
+        <Cards number={cardNumber} name={cardHolderName} expiry={expirationDate} cvc={cvv} focused={cardFocus} />
+      </CardContainer>
+      <PaymentForm>
+        <Form {...{ error: !!errorMessage }} {...{ loading: loading }} unstackable onSubmit={onSubmit}
+          id='payment-form'>
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          <Form.Field>
+            <label>Card Number:</label>
+            <Form.Input type='text' name='number' placeholder='**** **** **** ****' value={cardNumber}
+              onChange={onChangeCardNumber} onFocus={onChangeFocus} />
+          </Form.Field>
+          <Form.Field>
+            <label>Card Holder Name:</label>
+            <Form.Input type='text' name='name' placeholder='John Doe' value={cardHolderName}
+              onChange={onChangeCardHolderName} onFocus={onChangeFocus} />
+          </Form.Field>
+          <FlexWrapper>
+            <Form.Field>
+              <label>Expiration Date:</label>
+              <Form.Input type='text' name='expiry' placeholder='mm/yy' value={expirationDate}
+                onChange={onChangeExpirationDate} onFocus={onChangeFocus} />
+            </Form.Field>
+            <Form.Field>
+              <label>CVV:</label>
+              <Form.Input type='text' name='cvc' placeholder='123' value={cvv} onChange={onChangeCVV}
+                onFocus={onChangeFocus} />
+            </Form.Field>
+          </FlexWrapper>
+          <ButtonContainer>
+            <Form.Button type='submit' form='payment-form' content='Submit Payment' color='blue' />
+          </ButtonContainer>
+        </Form>
+      </PaymentForm>
+      <ThankYouPopup showPopup={submitSuccess} closePopup={closePopup} />
+    </>
   );
 };
+
+const CardContainer = styled.div`
+  position: relative;
+  width: 290px;
+  height: 182px;
+  margin-top: 10;
+  margin-bottom: 10;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transition: all 0.4s linear;
+  transition: all 0.4s linear;
+  margin: 30px auto 0;
+`;
+
+const PaymentForm = styled.div`
+  margin: 30px auto 0;
+  max-width: 400px;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const FlexWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
 
 export default PaymentPage;

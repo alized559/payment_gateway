@@ -8,7 +8,10 @@ const HOSTNAME = process.env.BACKEND_HOSTNAME;
 const PORT = process.env.BACKEND_PORT;
 
 const app = express();
+
+// Enable CORS.
 app.use(cors());
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer().any());
 
@@ -24,6 +27,6 @@ const router = express.Router();
 
 module.exports = { router };
 
-const paymentRouter = require('./payment');
+const paymentRouter = require('./payment/api');
 
 app.use('/api/payment', paymentRouter);

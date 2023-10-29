@@ -1,3 +1,4 @@
+// This is a function that creates middleware to require a string parameter in the request body.
 const requireStringParam = (paramName, validator = null) => {
   return (request, response, next) => {
     const value = request.body[paramName];

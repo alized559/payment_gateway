@@ -1,0 +1,6 @@
+.custom-modal {
+  width: 440px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(124.53deg, #F8F8F8 0%, #FFFFFF 46.15%, #E8E8E8 100%) !important;
+}  
