@@ -51,7 +51,7 @@ CREATE TABLE public.credit_cards (
     hashed_card_number text NOT NULL,
     hashed_cvv text NOT NULL,
     card_holder_name character varying(100) NOT NULL,
-    expiration_date character varying(7) NOT NULL
+    expiration_date character varying(5) NOT NULL
 );
 
 
